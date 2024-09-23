@@ -306,8 +306,8 @@ def dashboard_page():
     
     st.components.v1.iframe(
         "https://app.powerbi.com/view?r=eyJrIjoiNjBiNmNkNzAtNjkyMi00Y2FhLTgzMmItMDk3ZmEyODk1ZTYwIiwidCI6IjYyZmJhNjA1LThhMjktNDZhYS1hZDU0LTcyZjgwNmMwZWY1YSJ9",
-        width=1140, 
-        height=541
+        width=1920, 
+        height=1080
     )
 
 # Page navigation
