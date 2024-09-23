@@ -85,8 +85,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-EXCEL_FILE = 'farsight.xlsx'
-MODEL_PATH = './fine_tuned_model'
+# Updated paths
+EXCEL_FILE = 'https://raw.githubusercontent.com/ndegwaml/media/master/Farsight.xlsx'  # Updated with GitHub raw link
+MODEL_PATH = './fine_tuned_model'  # Ensure this path is correct on your deployment server
 SENTIMENT_LABELS = {0: 'Negative', 1: 'Neutral', 2: 'Positive'}
 
 # Caching functions
@@ -103,6 +104,7 @@ def load_data():
         df = pd.read_excel(EXCEL_FILE)
         return df
     except FileNotFoundError:
+        st.error("Excel file not found. Check the path and try again.")
         return pd.DataFrame()
 
 # Sentiment analysis function
@@ -162,11 +164,8 @@ def display_search_results(search_results, model, tokenizer):
             margin=dict(t=50, b=50, l=20, r=20)
         )
         st.plotly_chart(fig, use_container_width=True)
-        
-        # # Download search results
-        # st.download_button(label="Download Results", data=search_results.to_csv(index=False), file_name="search_results.csv", mime="text/csv")
 
-# word cloud
+# Word cloud
 def create_wordcloud(text):
     wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
     plt.figure(figsize=(10, 5))
@@ -210,7 +209,6 @@ def home_page():
 
     # Sidebar filters
     with st.sidebar:
-        st.sidebar.image("https://media.licdn.com/dms/image/v2/D4D0BAQFk-Wh7z9QcoA/company-logo_200_200/company-logo_200_200/0/1685437983213/prescott_data_logo?e=2147483647&v=beta&t=w9MP41RnNmTWMvMwS_HqcbUeCAegtj6zuB4VaSFhH6M", width=160)
         st.sidebar.title("🔍 Filters")
         category = st.sidebar.multiselect('📁 Category', df['Category'].unique())
         tonality = st.sidebar.multiselect('Tonality', df['Tonality'].unique())
@@ -245,51 +243,6 @@ def home_page():
                     f'<div class="metric-value">{avg_sentiment:.2%}</div>'
                     '<div class="metric-label">Positive Sentiment</div>'
                     '</div>', unsafe_allow_html=True)
-
-    # Dataset Overview
-    st.header("📊 Dataset Overview")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Data Sample")
-        display_df = filtered_df.copy()
-        for col in display_df.select_dtypes(include=['datetime64']).columns:
-            display_df[col] = display_df[col].dt.strftime('%Y-%m-%d %H:%M:%S')
-        st.dataframe(display_df, height=300)
-        
-    with col2:
-        st.subheader("Data Distribution")
-        fig1 = px.pie(filtered_df, names='Category', title='Posts by Category',
-                      color_discrete_sequence=['#1F3B73', '#A2B9E5', '#FF7A00'])
-        fig1.update_traces(textposition='inside', textinfo='percent+label')
-        fig1.update_layout(margin=dict(t=50, b=50, l=20, r=20))
-        st.plotly_chart(fig1, use_container_width=True)
-
-        fig2 = px.bar(filtered_df['Tonality'].value_counts(), title='Tonality Distribution',
-                      color_discrete_sequence=['#1F3B73', '#A2B9E5', '#FF7A00'])
-        fig2.update_layout(xaxis_title="Tonality", yaxis_title="Count", margin=dict(t=50, b=50, l=20, r=20))
-        st.plotly_chart(fig2, use_container_width=True)
-
-    #Sentiment Analysis
-    st.header("🔄 Real-Time Sentiment Analysis")
-    user_input = st.text_area("Enter text for analysis:", placeholder="Type or paste your text here...")
-    if user_input:
-        sentiment = analyze_sentiment_bert(user_input, model, tokenizer)
-        sentiment_color = {'Positive': '#FF7A00', 'Neutral': '#A2B9E5', 'Negative': '#1F3B73'}
-        st.markdown(f"Predicted Sentiment: <span style='color:{sentiment_color[sentiment]};font-weight:bold;font-size:24px;'>{sentiment}</span>", unsafe_allow_html=True)
-
-        # Sentiment visualization
-        confidence = torch.softmax(model(**tokenizer(user_input, return_tensors='pt', truncation=True, padding=True, max_length=128)).logits, dim=1)[0]
-        confidence_df = pd.DataFrame({'Sentiment': list(SENTIMENT_LABELS.values()), 'Confidence': confidence.tolist()})
-        confidence_chart = alt.Chart(confidence_df).mark_bar().encode(
-            x='Sentiment',
-            y='Confidence',
-            color=alt.Color('Sentiment', scale=alt.Scale(domain=list(SENTIMENT_LABELS.values()), range=['#1F3B73', '#A2B9E5', '#FF7A00'])),
-            tooltip=['Sentiment', alt.Tooltip('Confidence', format='.2%')]
-        ).properties(title='Sentiment Confidence').interactive()
-        st.altair_chart(confidence_chart, use_container_width=True)
-
-
 
 # Dashboard page
 def dashboard_page():
