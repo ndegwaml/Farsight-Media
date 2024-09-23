@@ -85,29 +85,25 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-EXCEL_FILE = './data/Farsight.xlsx'  # Ensure the correct relative path is used
-MODEL_PATH = './fine_tuned_model'    # Path to your fine-tuned model
+EXCEL_FILE = 'farsight.xlsx'
+MODEL_PATH = './fine_tuned_model'
 SENTIMENT_LABELS = {0: 'Negative', 1: 'Neutral', 2: 'Positive'}
 
-# Caching the model with st.cache_resource to handle mutable objects
-@st.cache_resource
+# Caching functions
+@st.cache(allow_output_mutation=True)
 def load_model():
-    # Load the model and tokenizer from the specified directory
+    # Load the model
     model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
     tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
     return model, tokenizer
 
-# Caching the data load using st.cache_data
-@st.cache_data
+@st.cache
 def load_data():
     try:
-        # Use a relative path and ensure the Excel file is in the right directory
         df = pd.read_excel(EXCEL_FILE)
         return df
     except FileNotFoundError:
-        st.error("Excel file not found! Please make sure the file path is correct.")
         return pd.DataFrame()
-
 
 # Sentiment analysis function
 def analyze_sentiment_bert(text, model, tokenizer):
