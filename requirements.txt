@@ -6,3 +6,4 @@ transformers
 altair
 wordcloud
 matplotlib
+openpyxl
