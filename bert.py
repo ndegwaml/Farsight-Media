@@ -243,33 +243,26 @@ def home_page():
     filtered_df = filter_dataframe(filtered_df, category, source, tonality, theme, date_range)
 
     # Display key metrics based on the filtered data or overall data
-    if search_term and not filtered_df.empty:
-        data_to_display = filtered_df
-        st.subheader(f"Key Metrics for: {search_term}")
-    else:
-        data_to_display = df
-        st.subheader("Key Metrics")
-
-    # Key Metrics
+    st.subheader("Key Metrics (Filtered Data)")
     col1, col2, col3, col4 = st.columns(4)
     try:
         with col1:
             st.markdown('<div class="card">'
-                        f'<div class="metric-value">{len(data_to_display):,}</div>'
+                        f'<div class="metric-value">{len(filtered_df):,}</div>'
                         '<div class="metric-label">Total Posts</div>'
                         '</div>', unsafe_allow_html=True)
         with col2:
             st.markdown('<div class="card">'
-                        f'<div class="metric-value">{data_to_display["Category"].nunique()}</div>'
+                        f'<div class="metric-value">{filtered_df["Category"].nunique()}</div>'
                         '<div class="metric-label">Categories</div>'
                         '</div>', unsafe_allow_html=True)
         with col3:
             st.markdown('<div class="card">'
-                        f'<div class="metric-value">{data_to_display["Theme"].nunique()}</div>'
+                        f'<div class="metric-value">{filtered_df["Theme"].nunique()}</div>'
                         '<div class="metric-label">Themes</div>'
                         '</div>', unsafe_allow_html=True)
         with col4:
-            avg_sentiment = data_to_display['Tonality'].value_counts(normalize=True).get('Positive', 0)
+            avg_sentiment = filtered_df['Tonality'].value_counts(normalize=True).get('Positive', 0)
             st.markdown('<div class="card">'
                         f'<div class="metric-value">{avg_sentiment:.2%}</div>'
                         '<div class="metric-label">Positive Sentiment</div>'
