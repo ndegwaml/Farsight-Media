@@ -87,20 +87,29 @@ st.markdown("""
 
 EXCEL_FILE = 'Farsight.xlsx'
 MODEL_PATH = './fine_tuned_model'
+SENTIMENT_LABELS = {0: 'Negative', 1: 'Neutral', 2: 'Positive'}
 
-# Load the model and tokenizer from the provided directory
+# Load the model and tokenizer with error handling for safetensors
 @st.cache(allow_output_mutation=True)
 def load_model():
     try:
-        # Load model using safetensors format
+        # Attempt to load model using safetensors
         model = BertForSequenceClassification.from_pretrained(MODEL_PATH, use_safetensors=True)
         tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
         return model, tokenizer
     except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None, None
+        st.error(f"Error loading model with safetensors: {e}")
+        
+        try:
+            # Fallback to loading the model without safetensors
+            model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
+            tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+            return model, tokenizer
+        except Exception as e:
+            st.error(f"Error loading model without safetensors: {e}")
+            return None, None
 
-# Error Handling for loading data
+# Load data with error handling
 @st.cache
 def load_data():
     try:
@@ -126,7 +135,7 @@ def analyze_sentiment_bert(text, model, tokenizer):
                 outputs = model(**inputs)
             probs = outputs.logits.softmax(dim=1)
             sentiment_label = torch.argmax(probs).item()
-        return SENTIMENT_LABELS[sentiment_label]
+        return SENTIMENT_LABELS.get(sentiment_label, "N/A")
     except Exception as e:
         st.error(f"Error analyzing sentiment: {e}")
         return "Error"
@@ -314,7 +323,8 @@ def home_page():
     if user_input:
         sentiment = analyze_sentiment_bert(user_input, model, tokenizer)
         sentiment_color = {'Positive': '#FF7A00', 'Neutral': '#A2B9E5', 'Negative': '#1F3B73'}
-        st.markdown(f"Predicted Sentiment: <span style='color:{sentiment_color[sentiment]};font-weight:bold;font-size:24px;'>{sentiment}</span>", unsafe_allow_html=True)
+        color = sentiment_color.get(sentiment, '#000000')  # Default to black if sentiment is not recognized
+        st.markdown(f"Predicted Sentiment: <span style='color:{color};font-weight:bold;font-size:24px;'>{sentiment}</span>", unsafe_allow_html=True)
         try:
             confidence = torch.softmax(model(**tokenizer(user_input, return_tensors='pt', truncation=True, padding=True, max_length=128)).logits, dim=1)[0]
             confidence_df = pd.DataFrame({'Sentiment': list(SENTIMENT_LABELS.values()), 'Confidence': confidence.tolist()})
