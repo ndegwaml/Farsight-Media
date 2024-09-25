@@ -254,7 +254,7 @@ def home_page():
             st.subheader("Word Cloud")
             create_wordcloud(' '.join(filtered_df['Content']))
     else:
-        st.subheader("Data Sample")
+        st.subheader("Dataset")
         try:
             display_df = filtered_df.copy()
             for col in display_df.select_dtypes(include=['datetime64']).columns:
