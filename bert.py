@@ -313,7 +313,7 @@ def dashboard_page():
         st.markdown("""
         <div style="padding:20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <h3 style="color: #1F3B73;">Welcome to the PowerBi Dashboard</h3>
-            <p>This dashboard provides insights into the social media data. Exploring trends, sentiment analysis, and key metrics.</p>
+            <p>This dashboard provides insights into the social media data. Exploring themes and tonality and providing various charts.</p>
         </div>
         """, unsafe_allow_html=True)
         
