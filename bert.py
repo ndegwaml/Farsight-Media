@@ -285,7 +285,7 @@ def home_page():
 
     # Sentiment Analysis
     st.header("Real-Time Sentiment Analysis")
-    user_input = st.text_area("Enter text for analysis:", placeholder="Type or paste your text here...")
+    user_input = st.text_area("Enter news content for analysis:", placeholder="Type or paste your text here...")
     if user_input:
         sentiment = analyze_sentiment_bert(user_input, model, tokenizer)
         sentiment_color = {'Positive': '#FF7A00', 'Neutral': '#A2B9E5', 'Negative': '#1F3B73'}
