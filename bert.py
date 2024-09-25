@@ -195,7 +195,7 @@ def home_page():
     with st.sidebar:
         try:
             st.sidebar.image("https://media.licdn.com/dms/image/v2/D4D0BAQFk-Wh7z9QcoA/company-logo_200_200/company-logo_200_200/0/1685437983213/prescott_data_logo?e=2147483647&v=beta&t=w9MP41RnNmTWMvMwS_HqcbUeCAegtj6zuB4VaSFhH6M", width=160)
-            st.sidebar.title("🔍 Filters")
+            st.sidebar.title("Filters")
             category = st.sidebar.multiselect('📁 Category', df['Category'].unique())
 
             # Update Source filter based on selected Category
