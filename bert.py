@@ -252,7 +252,7 @@ def home_page():
     filtered_df = filter_dataframe(filtered_df, category, source, tonality, theme, date_range)
 
     # Display key metrics based on the filtered data or overall data
-    st.subheader("Key Metrics for the filtered Data")
+    st.subheader("Key Metrics")
     col1, col2, col3, col4 = st.columns(4)
     try:
         with col1:
