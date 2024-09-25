@@ -189,7 +189,7 @@ def home_page():
         st.button('🖥️ PowerBI Dashboard', on_click=set_page, args=('dashboard',), key='dashboard_button')
 
     with col2:
-        search_term = st.text_input("Enter keyword or Topic:", placeholder="Type here to search...")
+        search_term = st.text_input("Enter keyword or Topic for search:", placeholder="Type here to search...")
 
     # Sidebar filters with error handling
     with st.sidebar:
