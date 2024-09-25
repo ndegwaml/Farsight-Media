@@ -168,46 +168,6 @@ def filter_dataframe(df, category, source, tonality, theme, date_range):
         st.error(f"Error filtering data: {e}")
         return df
 
-# Search Results with error handling
-def display_search_results(search_results, model, tokenizer):
-    try:
-        st.subheader("Search Results")
-        if search_results.empty:
-            st.write("No results found.")
-            return
-        
-        numeric_cols = search_results.select_dtypes(include=['float64', 'int64']).columns
-        st.dataframe(search_results.style.apply(lambda x: ['background-color: yellow' if v == x.max() else '' for v in x], subset=numeric_cols, axis=0))
-        
-        search_results['Predicted Sentiment'] = search_results['Content'].apply(lambda x: analyze_sentiment_bert(x, model, tokenizer))
-        
-        fig = px.pie(
-            search_results, 
-            names='Predicted Sentiment', 
-            title='Sentiment Distribution for Search Results',
-            color_discrete_sequence=['#FF7A00', '#A2B9E5', '#1F3B73'],
-            hole=0.3
-        )
-        fig.update_traces(textposition='inside', textinfo='percent+label')
-        fig.update_layout(
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-            margin=dict(t=50, b=50, l=20, r=20)
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    except Exception as e:
-        st.error(f"Error displaying search results: {e}")
-
-# Word cloud with error handling
-def create_wordcloud(text):
-    try:
-        wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-        plt.figure(figsize=(10, 5))
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.axis('off')
-        st.pyplot(plt)
-    except Exception as e:
-        st.error(f"Error generating word cloud: {e}")
-
 # Home page
 def home_page():
     st.title('Farsight Social Listening and Classification System')
@@ -219,6 +179,10 @@ def home_page():
     if df.empty:
         st.warning("No data available to display.")
         return
+
+    # Calculate date range from the data
+    min_date = df['Date'].min()
+    max_date = df['Date'].max()
 
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -243,7 +207,9 @@ def home_page():
 
             tonality = st.sidebar.multiselect('Tonality', df['Tonality'].unique())
             theme = st.sidebar.multiselect('Theme', df['Theme'].unique())
-            date_range = st.sidebar.date_input('📅 Date Range', [])
+
+            # Use min and max dates from the dataset for the date range filter
+            date_range = st.sidebar.date_input('📅 Date Range', [min_date, max_date], min_value=min_date, max_value=max_date)
         except Exception as e:
             st.error(f"Error setting filters: {e}")
 
@@ -252,7 +218,7 @@ def home_page():
     filtered_df = filter_dataframe(filtered_df, category, source, tonality, theme, date_range)
 
     # Display key metrics based on the filtered data or overall data
-    st.subheader("Key Metrics")
+    st.subheader("Key Metrics (Filtered Data)")
     col1, col2, col3, col4 = st.columns(4)
     try:
         with col1:
