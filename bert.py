@@ -3,8 +3,6 @@ import pandas as pd
 import torch
 import plotly.express as px
 from transformers import BertTokenizer, BertForSequenceClassification
-from transformers import BertTokenizer, BertForSequenceClassification, SafeTensor
-from safetensors.torch import load_file 
 import altair as alt
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
@@ -89,19 +87,19 @@ st.markdown("""
 
 EXCEL_FILE = 'Farsight.xlsx'
 MODEL_PATH = './fine_tuned_model'
-SENTIMENT_LABELS = {0: 'Negative', 1: 'Neutral', 2: 'Positive'}
 
-# Error Handling for loading model
+# Load the model and tokenizer from the provided directory
 @st.cache(allow_output_mutation=True)
 def load_model():
     try:
-        # Load model using SafeTensor
-        model = BertForSequenceClassification.from_pretrained(MODEL_PATH, from_safetensors=True)
+        # Load model using safetensors format
+        model = BertForSequenceClassification.from_pretrained(MODEL_PATH, use_safetensors=True)
         tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
         return model, tokenizer
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None, None
+
 # Error Handling for loading data
 @st.cache
 def load_data():
