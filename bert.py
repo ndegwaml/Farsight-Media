@@ -170,7 +170,7 @@ def filter_dataframe(df, category, source, tonality, theme, date_range):
 
 # Home page
 def home_page():
-    st.title('Farsight Social Listening and Classification System')
+    st.title('Farsights Social Listening and Classification System')
 
     # Load the data and model
     df = load_data()
