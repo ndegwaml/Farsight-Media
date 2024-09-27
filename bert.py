@@ -90,22 +90,22 @@ MODEL_PATH = './fine_tuned_model'
 SENTIMENT_LABELS = {0: 'Negative', 1: 'Neutral', 2: 'Positive'}
 
 
-@st.cache(allow_output_mutation=True)
-def load_model():
-    try:
-        model = BertForSequenceClassification.from_pretrained(MODEL_PATH, use_safetensors=True)
-        tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
-        return model, tokenizer
-    except Exception as e:
-        st.error(f"Error loading model with safetensors: {e}")
+# @st.cache(allow_output_mutation=True)
+# def load_model():
+#     try:
+#         model = BertForSequenceClassification.from_pretrained(MODEL_PATH, use_safetensors=True)
+#         tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+#         return model, tokenizer
+#     except Exception as e:
+#         st.error(f"Error loading model with safetensors: {e}")
         
-        try:
-            model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
-            tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
-            return model, tokenizer
-        except Exception as e:
-            st.error(f"Error loading model without safetensors: {e}")
-            return None, None
+#         try:
+#             model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
+#             tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
+#             return model, tokenizer
+#         except Exception as e:
+#             st.error(f"Error loading model without safetensors: {e}")
+#             return None, None
 
 @st.cache
 def load_data():
@@ -119,22 +119,22 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-def analyze_sentiment_bert(text, model, tokenizer):
-    if not model or not tokenizer:
-        st.warning("Model or tokenizer not loaded properly. Sentiment analysis cannot be performed.")
-        return "N/A"
+# def analyze_sentiment_bert(text, model, tokenizer):
+#     if not model or not tokenizer:
+#         st.warning("Model or tokenizer not loaded properly. Sentiment analysis cannot be performed.")
+#         return "N/A"
     
-    try:
-        with st.spinner('Analyzing sentiment...'):
-            inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
-            with torch.no_grad():
-                outputs = model(**inputs)
-            probs = outputs.logits.softmax(dim=1)
-            sentiment_label = torch.argmax(probs).item()
-        return SENTIMENT_LABELS.get(sentiment_label, "N/A")
-    except Exception as e:
-        st.error(f"Error analyzing sentiment: {e}")
-        return "Error"
+#     try:
+#         with st.spinner('Analyzing sentiment...'):
+#             inputs = tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=128)
+#             with torch.no_grad():
+#                 outputs = model(**inputs)
+#             probs = outputs.logits.softmax(dim=1)
+#             sentiment_label = torch.argmax(probs).item()
+#         return SENTIMENT_LABELS.get(sentiment_label, "N/A")
+#     except Exception as e:
+#         st.error(f"Error analyzing sentiment: {e}")
+#         return "Error"
 
 def filter_data_by_keyword(df, keyword):
     if keyword:
@@ -271,30 +271,30 @@ def home_page():
     except Exception as e:
         st.error(f"Error displaying dataset overview: {e}")
 
-    # Sentiment Analysis
-    st.header("Real-Time Sentiment Analysis")
-    user_input = st.text_area("Enter news content for analysis:", placeholder="Type or paste your text here...")
-    if user_input:
-        sentiment = analyze_sentiment_bert(user_input, model, tokenizer)
-        sentiment_color = {'Positive': '#FF7A00', 'Neutral': '#A2B9E5', 'Negative': '#1F3B73'}
-        color = sentiment_color.get(sentiment, '#000000')  # Default to black if sentiment is not recognized
-        st.markdown(f"Predicted Sentiment: <span style='color:{color};font-weight:bold;font-size:24px;'>{sentiment}</span>", unsafe_allow_html=True)
-        try:
-            confidence = torch.softmax(model(**tokenizer(user_input, return_tensors='pt', truncation=True, padding=True, max_length=128)).logits, dim=1)[0]
-            confidence_df = pd.DataFrame({'Sentiment': list(SENTIMENT_LABELS.values()), 'Confidence': confidence.tolist()})
-            confidence_chart = alt.Chart(confidence_df).mark_bar().encode(
-                x='Sentiment',
-                y='Confidence',
-                color=alt.Color('Sentiment', scale=alt.Scale(domain=list(SENTIMENT_LABELS.values()), range=['#1F3B73', '#A2B9E5', '#FF7A00'])),
-                tooltip=['Sentiment', alt.Tooltip('Confidence', format='.2%')]
-            ).properties(title='Sentiment Confidence').interactive()
-            st.altair_chart(confidence_chart, use_container_width=True)
-        except Exception as e:
-            st.error(f"Error displaying sentiment confidence: {e}")
+    # # Sentiment Analysis
+    # st.header("Real-Time Sentiment Analysis")
+    # user_input = st.text_area("Enter news content for analysis:", placeholder="Type or paste your text here...")
+    # if user_input:
+    #     sentiment = analyze_sentiment_bert(user_input, model, tokenizer)
+    #     sentiment_color = {'Positive': '#FF7A00', 'Neutral': '#A2B9E5', 'Negative': '#1F3B73'}
+    #     color = sentiment_color.get(sentiment, '#000000')  # Default to black if sentiment is not recognized
+    #     st.markdown(f"Predicted Sentiment: <span style='color:{color};font-weight:bold;font-size:24px;'>{sentiment}</span>", unsafe_allow_html=True)
+    #     try:
+    #         confidence = torch.softmax(model(**tokenizer(user_input, return_tensors='pt', truncation=True, padding=True, max_length=128)).logits, dim=1)[0]
+    #         confidence_df = pd.DataFrame({'Sentiment': list(SENTIMENT_LABELS.values()), 'Confidence': confidence.tolist()})
+    #         confidence_chart = alt.Chart(confidence_df).mark_bar().encode(
+    #             x='Sentiment',
+    #             y='Confidence',
+    #             color=alt.Color('Sentiment', scale=alt.Scale(domain=list(SENTIMENT_LABELS.values()), range=['#1F3B73', '#A2B9E5', '#FF7A00'])),
+    #             tooltip=['Sentiment', alt.Tooltip('Confidence', format='.2%')]
+    #         ).properties(title='Sentiment Confidence').interactive()
+    #         st.altair_chart(confidence_chart, use_container_width=True)
+    #     except Exception as e:
+    #         st.error(f"Error displaying sentiment confidence: {e}")
 
 
 def dashboard_page():
-    st.title("🖥️ PowerBi Dashboard")
+    #st.title("🖥️ PowerBi Dashboard")
     st.button('🏠 Back to Home', on_click=set_page, args=('home',), key='home_button')
     
     try:
