@@ -89,11 +89,10 @@ EXCEL_FILE = 'Farsight.xlsx'
 MODEL_PATH = './fine_tuned_model'
 SENTIMENT_LABELS = {0: 'Negative', 1: 'Neutral', 2: 'Positive'}
 
-# Load the model and tokenizer with error handling for safetensors
+
 @st.cache(allow_output_mutation=True)
 def load_model():
     try:
-        # Attempt to load model using safetensors
         model = BertForSequenceClassification.from_pretrained(MODEL_PATH, use_safetensors=True)
         tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
         return model, tokenizer
@@ -101,7 +100,6 @@ def load_model():
         st.error(f"Error loading model with safetensors: {e}")
         
         try:
-            # Fallback to loading the model without safetensors
             model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
             tokenizer = BertTokenizer.from_pretrained(MODEL_PATH)
             return model, tokenizer
@@ -109,7 +107,6 @@ def load_model():
             st.error(f"Error loading model without safetensors: {e}")
             return None, None
 
-# Load data with error handling
 @st.cache
 def load_data():
     try:
@@ -122,7 +119,6 @@ def load_data():
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-# Sentiment analysis function with error handling
 def analyze_sentiment_bert(text, model, tokenizer):
     if not model or not tokenizer:
         st.warning("Model or tokenizer not loaded properly. Sentiment analysis cannot be performed.")
@@ -140,7 +136,6 @@ def analyze_sentiment_bert(text, model, tokenizer):
         st.error(f"Error analyzing sentiment: {e}")
         return "Error"
 
-# Filter dataframe based on keyword
 def filter_data_by_keyword(df, keyword):
     if keyword:
         return df[df['Content'].str.contains(keyword, case=False, na=False)]
@@ -168,11 +163,9 @@ def filter_dataframe(df, category, source, tonality, theme, date_range):
         st.error(f"Error filtering data: {e}")
         return df
 
-# Home page
 def home_page():
     st.title('Farsight Social Listening and Classification System')
 
-    # Load the data and model
     df = load_data()
     model, tokenizer = load_model()
 
@@ -191,14 +184,12 @@ def home_page():
     with col2:
         search_term = st.text_input("Enter keyword or Topic for search:", placeholder="Type here to search...")
 
-    # Sidebar filters with error handling
     with st.sidebar:
         try:
             st.sidebar.image("https://media.licdn.com/dms/image/v2/D4D0BAQFk-Wh7z9QcoA/company-logo_200_200/company-logo_200_200/0/1685437983213/prescott_data_logo?e=2147483647&v=beta&t=w9MP41RnNmTWMvMwS_HqcbUeCAegtj6zuB4VaSFhH6M", width=160)
             st.sidebar.title("Filters")
             category = st.sidebar.multiselect('📁 Category', df['Category'].unique())
 
-            # Update Source filter based on selected Category
             if category:
                 filtered_sources = df[df['Category'].isin(category)]['Source'].unique()
                 source = st.sidebar.multiselect('📰 Source', filtered_sources)
@@ -208,7 +199,6 @@ def home_page():
             tonality = st.sidebar.multiselect('Tonality', df['Tonality'].unique())
             theme = st.sidebar.multiselect('Theme', df['Theme'].unique())
 
-            # Use min and max dates from the dataset for the date range filter
             date_range = st.sidebar.date_input('📅 Date Range', [min_date, max_date], min_value=min_date, max_value=max_date)
         except Exception as e:
             st.error(f"Error setting filters: {e}")
@@ -245,7 +235,6 @@ def home_page():
     except Exception as e:
         st.error(f"Error displaying key metrics: {e}")
 
-    # Display search results and data
     if search_term:
         if filtered_df.empty:
             st.write("No results found.")
@@ -263,7 +252,6 @@ def home_page():
         except Exception as e:
             st.error(f"Error displaying data sample: {e}")
 
-    # Dataset Overview
     try:
         col1, col2 = st.columns(2)
         
@@ -304,7 +292,7 @@ def home_page():
         except Exception as e:
             st.error(f"Error displaying sentiment confidence: {e}")
 
-# Dashboard page
+
 def dashboard_page():
     st.title("🖥️ PowerBi Dashboard")
     st.button('🏠 Back to Home', on_click=set_page, args=('home',), key='home_button')
@@ -325,11 +313,9 @@ def dashboard_page():
     except Exception as e:
         st.error(f"Error loading PowerBi Dashboard: {e}")
 
-# Page navigation
 def set_page(page_name):
     st.session_state.page = page_name
 
-# Main app
 def main():
     if "page" not in st.session_state:
         st.session_state.page = "home"
